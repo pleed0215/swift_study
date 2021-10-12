@@ -33,4 +33,33 @@ struct WeatherData: Codable {
     let weather: [Weather]
     let base: String?
     let main: WeatherMain?
+    let name: String?
+    
+    var conditionName:String {
+        switch weather[0].id {
+        case 200...232:
+            return "cloud.bolt"
+        case 300...321:
+            return "cloud.drizzle"
+        case 500...531:
+            return "cloud.rain"
+        case 600...622:
+            return "cloud.now"
+        case 701...781:
+            return "cloud.fog"
+        case 800:
+            return "sun.max"
+        case 801...804:
+            return "cloud.bolt"
+        default:
+            return "cloud"
+        }
+    }
+    
+    var tempDecimalString: String? {
+            if let safeMain = main {
+                return String(format: "%.0f", safeMain.temp!)
+            }
+            return nil;
+    }
 }

@@ -8,19 +8,22 @@
 
 import UIKit
 
-class WeatherViewController: UIViewController, UITextFieldDelegate {
+class WeatherViewController: UIViewController, UITextFieldDelegate, WeatherBrainDelegate {
 
     @IBOutlet weak var conditionImageView: UIImageView!
     @IBOutlet weak var temperatureLabel: UILabel!
     @IBOutlet weak var cityLabel: UILabel!
     @IBOutlet var searchField: UITextField!
     
-    let weatherData = WeatherBrain()
+    @IBOutlet weak var errorLabel: UILabel!
+    var weatherBrain = WeatherBrain()
+    var myWeather: WeatherData?
     
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
         searchField.delegate = self
+        weatherBrain.delegate = self
     }
 
     @IBAction func onTouchSearch(_ sender: Any) {
@@ -31,8 +34,7 @@ class WeatherViewController: UIViewController, UITextFieldDelegate {
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         let text = textField.text!
         if text != "" {
-            weatherData.fetchWeather(text)
-            print(weatherData.weatherData!)
+            weatherBrain.fetchWeather(text)
             textField.endEditing(false)
             return true
         }
@@ -40,6 +42,24 @@ class WeatherViewController: UIViewController, UITextFieldDelegate {
     }
     func textFieldDidEndEditing(_ textField: UITextField) {
         textField.text = ""
+    }
+    func didUpdateWeather(weather: WeatherData) {
+        print("Updated")
+        myWeather = weather
+        if let w = myWeather {
+            DispatchQueue.main.async {
+                self.conditionImageView.image = UIImage(systemName: w.conditionName)
+                self.temperatureLabel.text = w.tempDecimalString!
+                self.cityLabel.text = w.name!
+            }
+        }
+    }
+    
+    func didFailWithError(_ error: Error) {
+        DispatchQueue.main.async {
+            self.errorLabel.text = error.localizedDescription
+        }
+        
     }
 }
 
